@@ -1,0 +1,9 @@
+display_name: DTPP - Design to Printable Product Modeling
+short_description: DTPP/dtpp: convert product images into validated printable 3D models.
+default_prompt: Upload a product image and invoke dtpp in any capitalization to create a printable functional Blender/STL model with previews and validation reports.
+aliases:
+  - dtpp
+  - DTPP
+  - Dtpp
+  - dTpP
+case_insensitive_alias: true
