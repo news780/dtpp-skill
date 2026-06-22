@@ -20,10 +20,10 @@ Use this skill when the user provides a product image, design board, sketch, ren
 
 Typical phrasing:
 
-- `dtpp`、`DTPP`、`Dtpp`、`dTpP`。
-- 用户上传产品图，要求建模、导出 STL、做成能打印的模型。
-- 用户说「目标模式」「按照这张图做」「从设计图到建模」「能不能自己迭代到可打印」。
-- 用户要求功能件：容水、挂载、卡扣、旋盖、铰链、滴灌、灯罩、支架、香插、包装结构、宠物用品、小工具外壳。
+- `dtpp`、`DTPP`、`Dtpp`、`dTpP`
+- “根据我上传的产品图建模，并导出可打印的 STL。”
+- “进入目标模式，按这张图从产品设计迭代到可切片测试的模型。”
+- “做一个能装水、挂盆、卡扣、旋盖、滴灌、灯罩、支架或宠物用品等功能件。”
 
 Do not use this skill for pure image generation, decorative-only renderings, or slicer parameter tuning unless the model geometry has already passed functional validation.
 
@@ -40,7 +40,18 @@ The agent must act like a product-development loop:
 7. Iterate only on failed criteria.
 8. Stop with a clear pass/fail report and next physical-print tests.
 
-Never claim a model is 「可打印」 or 「可用」 only because it looks correct. A functional print requires geometry validation, printability validation, and feature-specific validation.
+Never claim a model is “功能已验证” / “functionally validated” only because it looks correct or passes a mesh check. A functional print requires geometry validation, printability validation, feature-specific validation, and physical evidence.
+
+## Evidence levels
+
+Use exactly one current evidence level in `design_manifest.json` and `check_report.md`:
+
+1. `cad_mesh_passed`: exported meshes pass the stated CAD/mesh checks. This is not proof of fit, slicing, or function.
+2. `slicer_checked`: the correct STL hashes are confirmed in the 3MF/slicer project and orientation, supports, and printable features are reviewed.
+3. `first_print_passed`: a first physical print completed and its dimensions/assembly observations are recorded.
+4. `function_physically_validated`: the product-specific real-world test passed, such as leak, drip-rate, load, clip retention, or repeated assembly.
+
+Only level 4 permits the statement “功能已验证” / “functionally validated.” Levels 1–3 are candidates for the next gate, not proof of final use.
 
 ## First response behavior
 
@@ -54,7 +65,7 @@ Ask questions only when a missing constraint blocks safe or useful modeling:
 - which side is visible versus functional,
 - must-fit measurements such as pot rim thickness, screw diameter, phone width, candle diameter.
 
-When uncertain, produce a default assumption table and mark each assumption as 「needs confirmation」, rather than silently inventing it.
+When uncertain, produce a default assumption table and mark each assumption as `needs confirmation` rather than silently inventing it.
 
 ## Target contract from image
 
@@ -80,7 +91,7 @@ Use Blender scripting or CAD-like procedural geometry where possible. Keep the m
 Recommended sequence:
 
 1. Create a clean version folder: `generated_vN/`.
-2. Define global units in millimeters.
+2. Define global units in millimeters and copy `references/design-manifest-template.json` to `design_manifest.json`.
 3. Build a low-detail functional skeleton first.
 4. Add fit-critical features: hooks, sockets, threads, holes, caps, channels, interfaces.
 5. Add internal functional volume or moving clearance.
@@ -104,7 +115,7 @@ Read `references/modeling-playbook.md` for detailed build phases and iteration r
 - For small nozzles/holes, export multiple test diameters when clogging or flow rate is uncertain.
 - For load-bearing parts, prefer fillets, ribs, larger root radii, and orientation-aware layer direction.
 
-Read `references/validation-checklist.md` before calling any output final.
+Read `references/fluid-container.md` before modeling or diagnosing any fluid part. Read `references/validation-checklist.md` before calling any output final.
 
 ## Visual interpretation rules
 
@@ -124,6 +135,7 @@ If the image conflicts with physical manufacturability, preserve the product int
 Minimum deliverables for a complete modeling run:
 
 - `target_contract.md`
+- `design_manifest.json`, the single source of truth for parameters, materials, versions, STL hashes, and evidence level
 - versioned Blender generation script, for example `generate_product_vN.py`
 - one or more STL files for printable parts
 - preview `.blend`
@@ -139,11 +151,13 @@ The agent must pass these gates in order:
 
 1. Target gate: target contract exists and all critical assumptions are listed.
 2. Feature gate: every functional feature in the target contract appears in the model.
-3. Mesh gate: exported STLs are re-imported and checked for manifold issues, degenerate faces, normals, scale, and components.
-4. Functional gate: product-specific checks pass, such as watertight reservoir, clip clearance, plug fit, hinge gap, airflow channel, cable pass-through, or load surface.
-5. Print gate: orientation, overhangs, support-removal access, wall thickness, and small-feature limits are checked.
-6. Visual gate: model is compared against the image for silhouette, proportions, part count, and visual red lines.
-7. Report gate: failures and remaining physical tests are explicitly listed.
+3. Mesh gate: exported STLs are re-imported and checked for manifold issues, degenerate faces, scale, and every connected component. `basic_pass` means this gate only.
+4. Product-rule gate: apply the relevant `--product-rules` checks and record what still requires measurement or a physical test.
+5. Print gate: confirm STL hashes in 3MF, then review orientation, overhangs, support-removal access, wall thickness, and small-feature limits.
+6. First-print gate: record the first printed part, actual dimensions, and assembly result.
+7. Functional gate: run the product-specific physical test. Only a pass raises the evidence level to `function_physically_validated`.
+8. Visual gate: complete `references/visual-acceptance.md` against the reference image and render set.
+9. Report gate: failures and remaining physical tests are explicitly listed.
 
 If any gate fails, iterate from the smallest responsible layer. Do not randomly tune all dimensions.
 
@@ -165,16 +179,16 @@ When a user rejects the look, do not keep patching the same failed modeling para
 If the user uploads `.blend`, `.stl`, `.3mf`, or slicer screenshots:
 
 1. Confirm the current Blender scene contains the target object; if not, inspect files directly.
-2. For `.3mf`, inspect it as zip/XML first to identify referenced STLs and slicer modifiers.
+2. For `.3mf`, inspect it as zip/XML first and write `3mf_manifest.json` to identify referenced STLs, hashes, versions, and slicer modifiers.
 3. Re-import the referenced STL files and validate them, not only the currently open scene.
 4. Distinguish geometry defects from slicer/support defects.
 5. If the printed part fails functionally, do not start with support blockers or print settings unless the geometry already passes the relevant functional gate.
 
-Use `scripts/validate_stl_blender.py` and `scripts/inspect_3mf.py` as starting points when available.
+Use `scripts/validate_stl_blender.py -- --product-rules fluid-container file.stl` and `scripts/inspect_3mf.py file.3mf` as starting points when available.
 
 ## Completion definition
 
-A task is complete only when the output package contains validated printable files and a report that tells the user:
+A modeling task is complete at its stated evidence level only when the output package contains its reports and tells the user:
 
 - what was built,
 - what assumptions were used,
@@ -184,12 +198,15 @@ A task is complete only when the output package contains validated printable fil
 - how to slice/print the first test piece,
 - what to change if the first print fails.
 
-Do not present concept renders as finished printable models.
+Do not present concept renders as finished printable models, and do not present a mesh pass as functional validation.
 
 ## References
 
 - For detailed intake: read `references/intake-schema.md`.
 - For build workflow: read `references/modeling-playbook.md`.
 - For validation: read `references/validation-checklist.md`.
+- For fluid products: read `references/fluid-container.md`.
+- For the single source of truth: copy `references/design-manifest-template.json` into the version folder.
+- For visual sign-off: read `references/visual-acceptance.md`.
 - For reusable prompts: read `references/prompt-templates.md`.
 - For a worked example based on the caterpillar planter dripper: read `references/case-caterpillar-dripper.md`.

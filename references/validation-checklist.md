@@ -1,5 +1,13 @@
 # Validation Checklist
 
+## 0. Evidence level and single source of truth
+
+- copy `design-manifest-template.json` to `design_manifest.json` in the version folder,
+- record every exported STL filename and SHA-256,
+- state the current evidence level: `cad_mesh_passed`, `slicer_checked`, `first_print_passed`, or `function_physically_validated`,
+- never infer a higher evidence level from a lower one,
+- only `function_physically_validated` permits the phrase “功能已验证” / “functionally validated”.
+
 ## 1. Mesh validity
 
 For every exported STL:
@@ -30,6 +38,7 @@ Select the relevant rows.
 - support material would not be trapped inside,
 - flow holes are exported in test sizes if uncertain,
 - cap/plug has clearance and grip features.
+- read `fluid-container.md`; manifold status alone is not a reservoir validation.
 
 ### Clip, hook, or mounting part
 
@@ -86,8 +95,15 @@ If a 3MF is provided or generated:
 - identify support blockers/modifiers separately from model geometry,
 - confirm the printed body is the newly generated STL, not an old referenced STL,
 - record printer/material/profile assumptions.
+- run `inspect_3mf.py` and retain `3mf_manifest.json` with STL hashes and stale-reference warnings.
 
-## 5. Final report template
+## 5. Visual acceptance
+
+- complete `visual-acceptance.md` against the reference image and all required render views,
+- record a pass/fail for silhouette, part count, visual identity, visible function, and every visual red line,
+- if it fails, change the smallest responsible visual layer instead of hiding it with render framing.
+
+## 6. Final report template
 
 ```markdown
 # Check Report
@@ -98,6 +114,8 @@ If a 3MF is provided or generated:
 - Generated files:
 - User target:
 - Main assumptions:
+- Evidence level:
+- `design_manifest.json`:
 
 ## Dimensions
 
