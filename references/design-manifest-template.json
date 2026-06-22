@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.1",
+  "product": {
+    "name": "product-name",
+    "version": "v1",
+    "target_contract": "target_contract.md"
+  },
+  "parameters_mm": {
+    "overall_dimensions": [0, 0, 0],
+    "wall_thickness": 0,
+    "clearance": 0,
+    "fit_critical_dimensions": {}
+  },
+  "print_profile": {
+    "printer": "unconfirmed",
+    "material": "unconfirmed",
+    "nozzle_mm": 0,
+    "layer_height_mm": 0,
+    "orientation": "unconfirmed",
+    "supports": "unconfirmed"
+  },
+  "parts": [
+    {
+      "name": "part-name",
+      "stl": "product_v1_part-name.stl",
+      "sha256": null,
+      "purpose": "functional or visual role",
+      "variant": "default"
+    }
+  ],
+  "slicer": {
+    "three_mf": null,
+    "manifest": "3mf_manifest.json",
+    "stl_hashes_confirmed": false
+  },
+  "validations": {
+    "evidence_level": "cad_mesh_passed",
+    "mesh": {
+      "passed": false,
+      "report": "check_report.md"
+    },
+    "product_rules": [],
+    "slicer_checked": false,
+    "first_print": {
+      "passed": false,
+      "observations": []
+    },
+    "physical_function": {
+      "passed": false,
+      "tests": []
+    },
+    "visual_acceptance": {
+      "passed": false,
+      "report": "visual_acceptance.md"
+    }
+  },
+  "assumptions": [],
+  "remaining_physical_tests": []
+}

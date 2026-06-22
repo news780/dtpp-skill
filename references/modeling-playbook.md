@@ -4,7 +4,7 @@
 
 Target mode means the agent owns the closed loop from product image to printable candidate. It does not mean the agent may skip validation or user constraints.
 
-Produce a target contract and a short execution plan before editing geometry. If the user explicitly says to proceed without questions, proceed with marked assumptions.
+Produce a target contract, `design_manifest.json`, and a short execution plan before editing geometry. If the user explicitly says to proceed without questions, proceed with marked assumptions.
 
 ## Phase 1: functional skeleton
 
@@ -26,6 +26,7 @@ Common constants:
 - `FIT_SLOT_WIDTH_MM`
 - `PART_VERSION`
 - `EXPORT_DIR`
+- `EVIDENCE_LEVEL`
 
 ## Phase 2: visual shell
 
@@ -103,6 +104,8 @@ Recommended files:
 - `product_vN_preview_three_quarter.png`
 - `check_report.md`
 - `summary.json`
+- `design_manifest.json`
+- `3mf_manifest.json` when a slicer project exists
 
 ## Blender implementation notes
 
